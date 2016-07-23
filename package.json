@@ -1,6 +1,6 @@
 {
   "name": "jpg-size-reader",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Gets the height and width of the jpeg image",
   "main": "index.js",
   "scripts": {
