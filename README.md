@@ -7,7 +7,7 @@ Gets the height and width of the jpeg image
 
 ## Example
 ```JavaScript
-const reader = require('jpg-size-reader);
+const reader = require('jpg-size-reader');
 reader(tgtFilePath).then((result) => {
   console.log(result); // [width, height]
 });
