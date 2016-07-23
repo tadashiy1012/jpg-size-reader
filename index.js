@@ -29,7 +29,7 @@ module.exports = (function() {
     return new Promise((resolve, reject) => {
       fs.readFile(tgtImagePath, (err, data) => {
         if (err) { reject(err); }
-        else { resolve(new Uint8Array(data)); }
+        else { resolve(data); }
       });
     });
   }
@@ -61,11 +61,16 @@ module.exports = (function() {
     return result;
   }
 
+  function checkTop(bary) {
+    const b = bary.subarray(0, 2);
+    return comp(b, JPG_SIGNATURE);
+  }
+
   function check(segs) {
-    const seg1 = findSeg(segs, JPG_SIGNATURE);
-    const seg2 = findSeg(segs, [0xff, 0xe0]);
-    const jfif = seg2[0].subarray(4, 9);
-    return seg1.length > 0 && comp(jfif, JFIF);
+    const seg = findSeg(segs, [0xff, 0xe0]);
+    if (seg.length === 0) { return false; }
+    const jfif = seg[0].subarray(4, 9);
+    return comp(jfif, JFIF);
   }
 
   function getSize(segs) {
@@ -83,14 +88,17 @@ module.exports = (function() {
   return function jpgExifReader(tgtFilePath) {
     return new Promise((resolve, reject) => {
       readBuf(tgtFilePath).then((resp) => {
-        const segs = getSegment(resp);
-        if (check(segs)) {
-          resolve(getSize(segs));
+        if (checkTop(resp)) {
+          const segs = getSegment(resp);
+          if (check(segs)) {
+            resolve(getSize(segs));
+          } else {
+            reject(new Error('Unsupported file type'));
+          }
         } else {
           reject(new Error('Unsupported file type'));
         }
       }).catch((err) => {
-        console.log(err);
         reject(err);
       });
     });
